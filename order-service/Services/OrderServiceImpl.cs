@@ -1,0 +1,208 @@
+using QuickBite.Order.DTOs;
+using QuickBite.Order.Entities;
+using QuickBite.Order.Interfaces;
+
+namespace QuickBite.Order.Services
+{
+    public class OrderServiceImpl : IOrderService
+    {
+        private readonly IOrderRepository _orderRepo;
+        private readonly ILogger<OrderServiceImpl> _logger;
+
+        public OrderServiceImpl(IOrderRepository orderRepo, ILogger<OrderServiceImpl> logger)
+        {
+            _orderRepo = orderRepo;
+            _logger = logger;
+        }
+
+        public async Task<OrderResponseDto> PlaceOrderAsync(int customerId, PlaceOrderRequestDto request)
+        {
+            double calculatedTotal = request.Items.Sum(i => i.Price * i.Quantity);
+            double finalAmount = calculatedTotal - request.Discount;
+            if (finalAmount < 0) finalAmount = 0;
+
+            var order = new Entities.Order
+            {
+                CustomerId = customerId,
+                RestaurantId = request.RestaurantId,
+                TotalAmount = calculatedTotal,
+                Discount = request.Discount,
+                FinalAmount = finalAmount,
+                ModeOfPayment = request.ModeOfPayment,
+                OrderStatus = "PLACED",
+                OrderDate = DateTime.UtcNow,
+                EstimatedDelivery = DateTime.UtcNow.AddMinutes(45), // basic estimation
+                DeliveryAddress = request.DeliveryAddress,
+                SpecialInstructions = request.SpecialInstructions,
+                Items = request.Items.Select(i => new OrderItem
+                {
+                    MenuItemId = i.MenuItemId,
+                    Name = i.Name,
+                    Price = i.Price,
+                    Quantity = i.Quantity,
+                    Customization = i.Customization
+                }).ToList()
+            };
+
+            await _orderRepo.AddAsync(order);
+            _logger.LogInformation("Order {OrderId} PLACED by Customer {CustomerId} for Restaurant {RestaurantId}", 
+                order.OrderId, customerId, order.RestaurantId);
+
+            return MapToResponse(order);
+        }
+
+        public async Task<OrderResponseDto> GetOrderByIdAsync(int orderId, int? userId = null, string? role = null)
+        {
+            var order = await _orderRepo.GetByIdAsync(orderId);
+            if (order == null) throw new KeyNotFoundException($"Order {orderId} not found");
+
+            // Basic authorization check
+            if (role == "CUSTOMER" && order.CustomerId != userId)
+                throw new UnauthorizedAccessException("You can only view your own orders");
+
+            return MapToResponse(order);
+        }
+
+        public async Task<List<OrderResponseDto>> GetOrdersByCustomerAsync(int customerId)
+        {
+            var orders = await _orderRepo.GetByCustomerIdAsync(customerId);
+            return orders.Select(MapToResponse).ToList();
+        }
+
+        public async Task<List<OrderResponseDto>> GetOrdersByRestaurantAsync(int restaurantId)
+        {
+            var orders = await _orderRepo.GetByRestaurantIdAsync(restaurantId);
+            return orders.Select(MapToResponse).ToList();
+        }
+
+        public async Task<List<OrderResponseDto>> GetActiveOrdersAsync()
+        {
+            var orders = await _orderRepo.GetActiveOrdersAsync();
+            return orders.Select(MapToResponse).ToList();
+        }
+
+        public async Task<OrderResponseDto> UpdateOrderStatusAsync(int orderId, string newStatus)
+        {
+            var order = await _orderRepo.GetByIdAsync(orderId);
+            if (order == null) throw new KeyNotFoundException($"Order {orderId} not found");
+
+            var validTransitions = new Dictionary<string, string[]>
+            {
+                { "PLACED", new[] { "CONFIRMED", "CANCELLED" } },
+                { "CONFIRMED", new[] { "PREPARING", "CANCELLED" } },
+                { "PREPARING", new[] { "PICKED_UP" } },
+                { "PICKED_UP", new[] { "DELIVERED" } },
+                { "DELIVERED", Array.Empty<string>() },
+                { "CANCELLED", Array.Empty<string>() }
+            };
+
+            if (!validTransitions.ContainsKey(order.OrderStatus) || !validTransitions[order.OrderStatus].Contains(newStatus))
+            {
+                throw new InvalidOperationException($"Cannot transition order from {order.OrderStatus} to {newStatus}");
+            }
+
+            order.OrderStatus = newStatus;
+            await _orderRepo.UpdateAsync(order);
+
+            _logger.LogInformation("Order {OrderId} status updated to {NewStatus}", orderId, newStatus);
+            return MapToResponse(order);
+        }
+
+        public async Task<OrderResponseDto> AssignDeliveryAgentAsync(int orderId, int agentId)
+        {
+            var order = await _orderRepo.GetByIdAsync(orderId);
+            if (order == null) throw new KeyNotFoundException($"Order {orderId} not found");
+
+            order.DeliveryAgentId = agentId;
+            await _orderRepo.UpdateAsync(order);
+
+            _logger.LogInformation("Agent {AgentId} assigned to Order {OrderId}", agentId, orderId);
+            return MapToResponse(order);
+        }
+
+        public async Task<OrderResponseDto> CancelOrderAsync(int orderId, int customerId)
+        {
+            var order = await _orderRepo.GetByIdAsync(orderId);
+            if (order == null) throw new KeyNotFoundException($"Order {orderId} not found");
+
+            if (order.CustomerId != customerId)
+                throw new UnauthorizedAccessException("You can only cancel your own orders");
+
+            if (order.OrderStatus != "PLACED" && order.OrderStatus != "CONFIRMED")
+                throw new InvalidOperationException("Order cannot be cancelled once preparation has started");
+
+            order.OrderStatus = "CANCELLED";
+            await _orderRepo.UpdateAsync(order);
+
+            if (order.ModeOfPayment != "COD")
+            {
+                _logger.LogInformation("Refund triggered for Order {OrderId} (Amount: {Amount})", orderId, order.FinalAmount);
+                // Call Payment-Service logic here eventually
+            }
+
+            _logger.LogWarning("Order {OrderId} CANCELLED by Customer {CustomerId}", orderId, customerId);
+            return MapToResponse(order);
+        }
+
+        public async Task<PlaceOrderRequestDto> ReorderFromHistoryAsync(int orderId, int customerId)
+        {
+            var order = await _orderRepo.GetByIdAsync(orderId);
+            if (order == null) throw new KeyNotFoundException($"Order {orderId} not found");
+
+            if (order.CustomerId != customerId)
+                throw new UnauthorizedAccessException("You can only reorder your own past orders");
+
+            return new PlaceOrderRequestDto
+            {
+                RestaurantId = order.RestaurantId,
+                DeliveryAddress = order.DeliveryAddress,
+                ModeOfPayment = order.ModeOfPayment, // Usually re-selected by user on frontend, but we prefill
+                Items = order.Items.Select(i => new CartItemDto
+                {
+                    MenuItemId = i.MenuItemId,
+                    Name = i.Name,
+                    Price = i.Price, // In real world, might fetch updated prices from menu service
+                    Quantity = i.Quantity,
+                    Customization = i.Customization
+                }).ToList()
+            };
+        }
+
+        public async Task<int> GetOrderCountForRestaurantAsync(int restaurantId)
+        {
+            return await _orderRepo.CountByRestaurantIdAsync(restaurantId);
+        }
+
+        // ─── Helpers ─────────────────────────────────────────────────────────
+
+        private static OrderResponseDto MapToResponse(Entities.Order order)
+        {
+            return new OrderResponseDto
+            {
+                OrderId = order.OrderId,
+                CustomerId = order.CustomerId,
+                RestaurantId = order.RestaurantId,
+                DeliveryAgentId = order.DeliveryAgentId,
+                TotalAmount = order.TotalAmount,
+                Discount = order.Discount,
+                FinalAmount = order.FinalAmount,
+                ModeOfPayment = order.ModeOfPayment,
+                OrderStatus = order.OrderStatus,
+                OrderDate = order.OrderDate,
+                EstimatedDelivery = order.EstimatedDelivery,
+                DeliveryAddress = order.DeliveryAddress,
+                SpecialInstructions = order.SpecialInstructions,
+                Items = order.Items.Select(i => new OrderItemResponseDto
+                {
+                    OrderItemId = i.OrderItemId,
+                    MenuItemId = i.MenuItemId,
+                    Name = i.Name,
+                    Price = i.Price,
+                    Quantity = i.Quantity,
+                    Customization = i.Customization,
+                    SubTotal = i.Price * i.Quantity
+                }).ToList()
+            };
+        }
+    }
+}
