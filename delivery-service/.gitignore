@@ -1,0 +1,35 @@
+## .NET Build Artifacts
+bin/
+obj/
+publish/
+
+## Logs
+logs/
+*.log
+
+## User Secrets / Production Config
+appsettings.Production.json
+
+## IDE
+.idea/
+.vs/
+*.user
+*.suo
+*.sln.docstates
+.vscode/
+
+## OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+## NuGet
+*.nupkg
+**/packages/
+
+## Test Results
+TestResults/
+*.trx
+
+## .http test files
+*.http
