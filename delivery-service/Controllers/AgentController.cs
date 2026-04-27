@@ -45,6 +45,18 @@ namespace QuickBite.Delivery.Controllers
         }
 
         /// <summary>
+        /// Get all agents.
+        /// </summary>
+        [HttpGet("all")]
+        [Authorize(Roles = "ADMIN")]
+        [ProducesResponseType(typeof(List<AgentResponseDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAllAgents()
+        {
+            var result = await _deliveryService.GetAllAgentsAsync();
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Find nearby available agents using coordinates.
         /// </summary>
         [HttpGet("nearby")]

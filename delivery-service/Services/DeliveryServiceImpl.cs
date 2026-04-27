@@ -62,6 +62,12 @@ namespace QuickBite.Delivery.Services
             return MapToResponse(agent);
         }
 
+        public async Task<List<AgentResponseDto>> GetAllAgentsAsync()
+        {
+            var agents = await _agentRepo.GetAllAsync();
+            return agents.Select(MapToResponse).ToList();
+        }
+
         public async Task<List<AgentDistanceResponseDto>> GetNearbyAgentsAsync(double latitude, double longitude, double radiusInKm = 5)
         {
             var onlineAgents = await _agentRepo.GetAvailableAndVerifiedAsync();

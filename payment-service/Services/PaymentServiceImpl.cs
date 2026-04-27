@@ -88,6 +88,12 @@ namespace QuickBite.Payment.Services
             return payments.Select(MapToResponse).ToList();
         }
 
+        public async Task<List<PaymentResponseDto>> GetAllPaymentsAsync()
+        {
+            var payments = await _paymentRepo.GetAllAsync();
+            return payments.Select(MapToResponse).ToList();
+        }
+
         public async Task<PaymentResponseDto> RefundPaymentAsync(int paymentId)
         {
             var payment = await _paymentRepo.GetByPaymentIdAsync(paymentId);
@@ -150,6 +156,27 @@ namespace QuickBite.Payment.Services
             {
                 _logger.LogError(ex, "Razorpay signature verification failed.");
                 throw new InvalidOperationException("Invalid payment signature.");
+            }
+        }
+
+        public Task<string> CreateRazorpayOrderAsync(double amount)
+        {
+            try 
+            {
+                var client = new RazorpayClient(_config["Razorpay:Key"], _config["Razorpay:Secret"]);
+                var options = new Dictionary<string, object>
+                {
+                    { "amount", amount * 100 }, // in paise
+                    { "currency", "INR" },
+                    { "receipt", Guid.NewGuid().ToString() }
+                };
+                var order = client.Order.Create(options);
+                return Task.FromResult(order["id"].ToString());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create Razorpay order.");
+                throw new InvalidOperationException("Could not initiate payment gateway.");
             }
         }
 

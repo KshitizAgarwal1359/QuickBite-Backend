@@ -28,6 +28,11 @@ namespace QuickBite.Delivery.Repository
                 .ToListAsync();
         }
 
+        public async Task<List<DeliveryAgent>> GetAllAsync()
+        {
+            return await _context.DeliveryAgents.ToListAsync();
+        }
+
         public async Task<DeliveryAgent> AddAsync(DeliveryAgent agent)
         {
             await _context.DeliveryAgents.AddAsync(agent);

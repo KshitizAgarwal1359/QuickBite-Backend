@@ -65,6 +65,18 @@ namespace QuickBite.Payment.Controllers
         }
 
         /// <summary>
+        /// Get all payments for admin dashboard.
+        /// </summary>
+        [HttpGet("all")]
+        [Authorize(Roles = "ADMIN")]
+        [ProducesResponseType(typeof(List<PaymentResponseDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAllPayments()
+        {
+            var result = await _paymentService.GetAllPaymentsAsync();
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Initiate a refund for a payment. (Called by Order-Service on cancellation)
         /// </summary>
         [HttpPost("refund/{paymentId}")]
@@ -74,6 +86,18 @@ namespace QuickBite.Payment.Controllers
         {
             var result = await _paymentService.RefundPaymentAsync(paymentId);
             return Ok(result);
+        }
+
+        /// <summary>
+        /// Create a Razorpay Order ID before payment.
+        /// </summary>
+        [HttpPost("razorpay-order")]
+        [Authorize(Roles = "CUSTOMER")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> CreateRazorpayOrder([FromBody] double amount)
+        {
+            var result = await _paymentService.CreateRazorpayOrderAsync(amount);
+            return Ok(new { RazorpayOrderId = result });
         }
 
         // ─── Helper ─────────────────────────────────────────────────────────

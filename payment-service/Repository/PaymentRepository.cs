@@ -28,6 +28,11 @@ namespace QuickBite.Payment.Repository
                 .ToListAsync();
         }
 
+        public async Task<List<Entities.Payment>> GetAllAsync()
+        {
+            return await _context.Payments.OrderByDescending(p => p.PaymentId).ToListAsync();
+        }
+
         public async Task<Entities.Payment> AddAsync(Entities.Payment payment)
         {
             await _context.Payments.AddAsync(payment);
