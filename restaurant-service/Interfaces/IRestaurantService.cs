@@ -9,6 +9,7 @@ namespace QuickBite.Restaurant.Interfaces
         Task<List<RestaurantResponseDto>> GetByOwnerAsync(int ownerId);
         Task<List<RestaurantResponseDto>> GetByCuisineAsync(string cuisine);
         Task<List<RestaurantResponseDto>> GetByCityAsync(string city);
+        Task<List<RestaurantResponseDto>> GetAllAsync();
         Task<List<RestaurantResponseDto>> GetNearbyAsync(double latitude, double longitude, double radiusInKm);
         Task<List<RestaurantResponseDto>> SearchRestaurantsAsync(string keyword);
         Task<RestaurantResponseDto> UpdateRestaurantAsync(int restaurantId, int callerId, string callerRole, UpdateRestaurantRequestDto request);

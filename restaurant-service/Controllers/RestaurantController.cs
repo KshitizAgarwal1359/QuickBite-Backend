@@ -64,6 +64,18 @@ namespace QuickBite.Restaurant.Controllers
         }
 
         /// <summary>
+        /// Get all restaurants (Admin).
+        /// </summary>
+        [HttpGet("all")]
+        [Authorize(Roles = "ADMIN")]
+        [ProducesResponseType(typeof(List<RestaurantResponseDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _restaurantService.GetAllAsync();
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Filter approved restaurants by cuisine type.
         /// </summary>
         [HttpGet("cuisine/{type}")]

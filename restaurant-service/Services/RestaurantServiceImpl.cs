@@ -88,6 +88,12 @@ namespace QuickBite.Restaurant.Services
             return restaurants.Select(MapToResponse).ToList();
         }
 
+        public async Task<List<RestaurantResponseDto>> GetAllAsync()
+        {
+            var restaurants = await _repository.GetAllAsync();
+            return restaurants.Select(MapToResponse).ToList();
+        }
+
         public async Task<RestaurantResponseDto> UpdateRestaurantAsync(int restaurantId, int callerId, string callerRole, UpdateRestaurantRequestDto request)
         {
             var restaurant = await _repository.GetByIdAsync(restaurantId);

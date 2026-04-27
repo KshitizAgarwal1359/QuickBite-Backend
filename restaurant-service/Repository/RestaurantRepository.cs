@@ -53,6 +53,11 @@ namespace QuickBite.Restaurant.Repository
                 .ToListAsync();
         }
 
+        public async Task<List<Entities.Restaurant>> GetAllAsync()
+        {
+            return await _context.Restaurants.ToListAsync();
+        }
+
         /// <summary>
         /// Finds nearby restaurants using the Haversine formula.
         /// Earth radius = 6371 km.

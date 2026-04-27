@@ -11,6 +11,7 @@ namespace QuickBite.Restaurant.Interfaces
         Task<List<Entities.Restaurant>> FindNearbyAsync(double latitude, double longitude, double radiusInKm);
         Task<int> CountByCityAsync(string city);
         Task<Entities.Restaurant> AddAsync(Entities.Restaurant restaurant);
+        Task<List<Entities.Restaurant>> GetAllAsync();
         Task UpdateAsync(Entities.Restaurant restaurant);
         Task DeleteAsync(int restaurantId);
     }
