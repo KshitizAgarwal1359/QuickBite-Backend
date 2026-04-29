@@ -36,6 +36,9 @@ namespace QuickBite.Restaurant.DTOs
         [StringLength(15)]
         public string? Phone { get; set; }
 
+        [StringLength(2048)]
+        public string? ImageUrl { get; set; }
+
         [Required(ErrorMessage = "Delivery radius is required")]
         [Range(0.5, 50, ErrorMessage = "Delivery radius must be between 0.5 and 50 km")]
         public double DeliveryRadius { get; set; }

@@ -48,8 +48,12 @@ namespace QuickBite.Restaurant.Repository
 
         public async Task<List<Entities.Restaurant>> SearchByNameAsync(string keyword)
         {
+            var lower = keyword.ToLower();
             return await _context.Restaurants
-                .Where(r => r.Name.Contains(keyword) && r.IsApproved)
+                .Where(r => r.IsApproved &&
+                    (r.Name.ToLower().Contains(lower) ||
+                     r.Cuisine.ToLower().Contains(lower) ||
+                     (r.Description != null && r.Description.ToLower().Contains(lower))))
                 .ToListAsync();
         }
 

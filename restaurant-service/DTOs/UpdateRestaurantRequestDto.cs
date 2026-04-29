@@ -29,6 +29,9 @@ namespace QuickBite.Restaurant.DTOs
         [StringLength(15)]
         public string? Phone { get; set; }
 
+        [StringLength(2048)]
+        public string? ImageUrl { get; set; }
+
         [Range(0.5, 50)]
         public double? DeliveryRadius { get; set; }
 

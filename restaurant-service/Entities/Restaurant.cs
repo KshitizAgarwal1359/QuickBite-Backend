@@ -22,6 +22,8 @@ namespace QuickBite.Restaurant.Entities
 
         public string? Phone { get; set; }
 
+        public string? ImageUrl { get; set; }
+
         public double AvgRating { get; set; } = 0;
 
         public bool IsOpen { get; set; } = false;

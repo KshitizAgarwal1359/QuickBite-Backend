@@ -13,6 +13,7 @@ namespace QuickBite.Order.Interfaces
         Task<OrderResponseDto> AssignDeliveryAgentAsync(int orderId, int agentId);
         Task<OrderResponseDto> CancelOrderAsync(int orderId, int customerId);
         Task<PlaceOrderRequestDto> ReorderFromHistoryAsync(int orderId, int customerId);
+        Task<List<OrderResponseDto>> GetOrdersByAgentAsync(int agentId);
         Task<int> GetOrderCountForRestaurantAsync(int restaurantId);
     }
 }

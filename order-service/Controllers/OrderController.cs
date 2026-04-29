@@ -149,6 +149,18 @@ namespace QuickBite.Order.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Get active orders assigned to a delivery agent.
+        /// </summary>
+        [HttpGet("agent/{agentId}")]
+        [Authorize(Roles = "AGENT,ADMIN")]
+        [ProducesResponseType(typeof(List<OrderResponseDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAgentOrders(int agentId)
+        {
+            var result = await _orderService.GetOrdersByAgentAsync(agentId);
+            return Ok(result);
+        }
+
         // ─── Helper ─────────────────────────────────────────────────────────
 
         private int GetCurrentUserId()

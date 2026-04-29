@@ -69,6 +69,20 @@ namespace QuickBite.Delivery.Controllers
         }
 
         /// <summary>
+        /// Get the calling agent's own profile using their JWT identity (no stored ID required).
+        /// </summary>
+        [HttpGet("me")]
+        [Authorize(Roles = "AGENT")]
+        [ProducesResponseType(typeof(AgentResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetMyProfile()
+        {
+            var userId = GetCurrentUserId();
+            var result = await _deliveryService.GetAgentByUserIdAsync(userId);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Update live GPS location of the agent.
         /// </summary>
         [HttpPut("{id}/location")]

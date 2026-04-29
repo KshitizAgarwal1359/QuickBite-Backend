@@ -12,6 +12,7 @@ namespace QuickBite.Restaurant.DTOs
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public string? Phone { get; set; }
+        public string? ImageUrl { get; set; }
         public double AvgRating { get; set; }
         public bool IsOpen { get; set; }
         public bool IsApproved { get; set; }

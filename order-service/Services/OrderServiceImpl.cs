@@ -173,6 +173,17 @@ namespace QuickBite.Order.Services
             return await _orderRepo.CountByRestaurantIdAsync(restaurantId);
         }
 
+        public async Task<List<OrderResponseDto>> GetOrdersByAgentAsync(int agentId)
+        {
+            var orders = await _orderRepo.GetByAgentIdAsync(agentId);
+            // Only return orders that are still active (i.e., not completed or cancelled)
+            var activeStatuses = new[] { "PLACED", "CONFIRMED", "PREPARING", "PICKED_UP" };
+            return orders
+                .Where(o => activeStatuses.Contains(o.OrderStatus))
+                .Select(MapToResponse)
+                .ToList();
+        }
+
         // ─── Helpers ─────────────────────────────────────────────────────────
 
         private static OrderResponseDto MapToResponse(Entities.Order order)

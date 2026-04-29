@@ -27,6 +27,7 @@ namespace QuickBite.Restaurant.Services
                 Latitude = request.Latitude,
                 Longitude = request.Longitude,
                 Phone = request.Phone,
+                ImageUrl = request.ImageUrl,
                 DeliveryRadius = request.DeliveryRadius,
                 MinOrderAmount = request.MinOrderAmount,
                 EstimatedDeliveryMin = request.EstimatedDeliveryMin,
@@ -131,6 +132,9 @@ namespace QuickBite.Restaurant.Services
             if (request.Phone != null && request.Phone != restaurant.Phone)
             { restaurant.Phone = request.Phone; changes.Add("Phone"); }
 
+            if (request.ImageUrl != null && request.ImageUrl != restaurant.ImageUrl)
+            { restaurant.ImageUrl = request.ImageUrl; changes.Add("ImageUrl"); }
+
             if (request.DeliveryRadius.HasValue && request.DeliveryRadius.Value != restaurant.DeliveryRadius)
             { restaurant.DeliveryRadius = request.DeliveryRadius.Value; changes.Add("DeliveryRadius"); }
 
@@ -231,6 +235,7 @@ namespace QuickBite.Restaurant.Services
                 Latitude = restaurant.Latitude,
                 Longitude = restaurant.Longitude,
                 Phone = restaurant.Phone,
+                ImageUrl = restaurant.ImageUrl,
                 AvgRating = restaurant.AvgRating,
                 IsOpen = restaurant.IsOpen,
                 IsApproved = restaurant.IsApproved,
