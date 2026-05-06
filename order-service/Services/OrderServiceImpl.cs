@@ -7,11 +7,15 @@ namespace QuickBite.Order.Services
     public class OrderServiceImpl : IOrderService
     {
         private readonly IOrderRepository _orderRepo;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IConfiguration _config;
         private readonly ILogger<OrderServiceImpl> _logger;
 
-        public OrderServiceImpl(IOrderRepository orderRepo, ILogger<OrderServiceImpl> logger)
+        public OrderServiceImpl(IOrderRepository orderRepo, IHttpClientFactory httpClientFactory, IConfiguration config, ILogger<OrderServiceImpl> logger)
         {
             _orderRepo = orderRepo;
+            _httpClientFactory = httpClientFactory;
+            _config = config;
             _logger = logger;
         }
 
@@ -137,10 +141,34 @@ namespace QuickBite.Order.Services
             if (order.ModeOfPayment != "COD")
             {
                 _logger.LogInformation("Refund triggered for Order {OrderId} (Amount: {Amount})", orderId, order.FinalAmount);
-                // Call Payment-Service logic here eventually
+                await TriggerRefundAsync(orderId);
             }
 
             _logger.LogWarning("Order {OrderId} CANCELLED by Customer {CustomerId}", orderId, customerId);
+            return MapToResponse(order);
+        }
+
+        public async Task<OrderResponseDto> CancelOrderByOwnerAsync(int orderId, int restaurantId)
+        {
+            var order = await _orderRepo.GetByIdAsync(orderId);
+            if (order == null) throw new KeyNotFoundException($"Order {orderId} not found");
+
+            if (order.RestaurantId != restaurantId)
+                throw new UnauthorizedAccessException("You can only cancel orders belonging to your restaurant");
+
+            if (order.OrderStatus != "PLACED" && order.OrderStatus != "CONFIRMED")
+                throw new InvalidOperationException("Order cannot be cancelled once preparation has started");
+
+            order.OrderStatus = "CANCELLED";
+            await _orderRepo.UpdateAsync(order);
+
+            if (order.ModeOfPayment != "COD")
+            {
+                _logger.LogInformation("Refund triggered for Order {OrderId} (Amount: {Amount}) cancelled by Owner", orderId, order.FinalAmount);
+                await TriggerRefundAsync(orderId);
+            }
+
+            _logger.LogWarning("Order {OrderId} CANCELLED by Owner (RestaurantId: {RestaurantId})", orderId, restaurantId);
             return MapToResponse(order);
         }
 
@@ -185,6 +213,51 @@ namespace QuickBite.Order.Services
         }
 
         // ─── Helpers ─────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Calls the Payment-Service to find the payment for this order and initiate a refund.
+        /// Fails silently with a warning log so order cancellation always succeeds.
+        /// </summary>
+        private async Task TriggerRefundAsync(int orderId)
+        {
+            try
+            {
+                var paymentBaseUrl = _config["ServiceUrls:Payment"] ?? "http://localhost:5236";
+                var client = _httpClientFactory.CreateClient();
+
+                // Step 1: Get payment record for this order
+                var paymentResponse = await client.GetAsync($"{paymentBaseUrl}/api/v1/payments/order/{orderId}");
+                if (!paymentResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("No payment found for Order {OrderId} — skipping refund", orderId);
+                    return;
+                }
+
+                var payment = await paymentResponse.Content.ReadFromJsonAsync<dynamic>();
+                if (payment == null) return;
+
+                int paymentId = (int)payment.GetProperty("paymentId").GetInt32();
+                string status = payment.GetProperty("status").GetString() ?? "";
+
+                if (status != "PAID") 
+                {
+                    _logger.LogInformation("Payment {PaymentId} is not PAID (status: {Status}) — skipping refund", paymentId, status);
+                    return;
+                }
+
+                // Step 2: Trigger refund
+                var refundResponse = await client.PutAsync($"{paymentBaseUrl}/api/v1/payments/{paymentId}/refund", null);
+                if (refundResponse.IsSuccessStatusCode)
+                    _logger.LogInformation("Refund successfully initiated for Payment {PaymentId} (Order {OrderId})", paymentId, orderId);
+                else
+                    _logger.LogWarning("Refund call failed for Payment {PaymentId} — Status: {Status}", paymentId, refundResponse.StatusCode);
+            }
+            catch (Exception ex)
+            {
+                // Never block cancellation due to refund failure — log and continue
+                _logger.LogError(ex, "Exception while triggering refund for Order {OrderId}", orderId);
+            }
+        }
 
         private static OrderResponseDto MapToResponse(Entities.Order order)
         {

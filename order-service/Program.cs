@@ -75,6 +75,7 @@ try
     });
 
     // ─── DI ──────────────────────────────────────────────────────────────
+    builder.Services.AddHttpClient();   // IHttpClientFactory for payment-service refund calls
     builder.Services.AddScoped<IOrderRepository, OrderRepository>();
     builder.Services.AddScoped<IOrderService, OrderServiceImpl>();
 

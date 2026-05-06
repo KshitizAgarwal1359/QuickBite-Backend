@@ -112,7 +112,7 @@ namespace QuickBite.Order.Controllers
         }
 
         /// <summary>
-        /// Cancel an order before preparation begins.
+        /// Cancel an order before preparation begins (Customer or Admin).
         /// </summary>
         [HttpPut("{id}/cancel")]
         [Authorize(Roles = "CUSTOMER,ADMIN")]
@@ -121,6 +121,20 @@ namespace QuickBite.Order.Controllers
         {
             var userId = GetCurrentUserId();
             var result = await _orderService.CancelOrderAsync(id, userId);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Cancel a PLACED order from the owner's restaurant before preparation begins.
+        /// If payment was already made, a refund is automatically initiated.
+        /// </summary>
+        [HttpPut("{id}/cancel/owner")]
+        [Authorize(Roles = "OWNER")]
+        [ProducesResponseType(typeof(OrderResponseDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> CancelOrderByOwner(int id, [FromQuery] int restaurantId)
+        {
+            if (restaurantId <= 0) return BadRequest(new { message = "restaurantId query param is required" });
+            var result = await _orderService.CancelOrderByOwnerAsync(id, restaurantId);
             return Ok(result);
         }
 
