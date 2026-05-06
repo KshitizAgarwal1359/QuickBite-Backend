@@ -152,6 +152,19 @@ namespace QuickBite.Order.Controllers
         }
 
         /// <summary>
+        /// Customer confirms receipt of the order.
+        /// </summary>
+        [HttpPut("{id}/confirm-receipt")]
+        [Authorize(Roles = "CUSTOMER")]
+        [ProducesResponseType(typeof(OrderResponseDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ConfirmReceipt(int id)
+        {
+            var userId = GetCurrentUserId();
+            var result = await _orderService.CustomerConfirmReceiptAsync(id, userId);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Get the total order count for a specific restaurant.
         /// </summary>
         [HttpGet("count/{restId}")]

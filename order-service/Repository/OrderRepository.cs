@@ -49,7 +49,7 @@ namespace QuickBite.Order.Repository
 
         public async Task<List<Entities.Order>> GetActiveOrdersAsync()
         {
-            var activeStatuses = new[] { "PLACED", "CONFIRMED", "PREPARING", "PICKED_UP" };
+            var activeStatuses = new[] { "PLACED", "CONFIRMED", "PREPARING", "PICKED_UP", "CUSTOMER_RECEIVED" };
             return await _context.Orders
                 .Where(o => activeStatuses.Contains(o.OrderStatus))
                 .Include(o => o.Items)

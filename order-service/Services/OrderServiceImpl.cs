@@ -95,7 +95,8 @@ namespace QuickBite.Order.Services
                 { "PLACED", new[] { "CONFIRMED", "CANCELLED" } },
                 { "CONFIRMED", new[] { "PREPARING", "CANCELLED" } },
                 { "PREPARING", new[] { "PICKED_UP" } },
-                { "PICKED_UP", new[] { "DELIVERED" } },
+                { "PICKED_UP", new[] { "CUSTOMER_RECEIVED" } },
+                { "CUSTOMER_RECEIVED", new[] { "DELIVERED" } },
                 { "DELIVERED", Array.Empty<string>() },
                 { "CANCELLED", Array.Empty<string>() }
             };
@@ -121,6 +122,24 @@ namespace QuickBite.Order.Services
             await _orderRepo.UpdateAsync(order);
 
             _logger.LogInformation("Agent {AgentId} assigned to Order {OrderId}", agentId, orderId);
+            return MapToResponse(order);
+        }
+
+        public async Task<OrderResponseDto> CustomerConfirmReceiptAsync(int orderId, int customerId)
+        {
+            var order = await _orderRepo.GetByIdAsync(orderId);
+            if (order == null) throw new KeyNotFoundException($"Order {orderId} not found");
+
+            if (order.CustomerId != customerId)
+                throw new UnauthorizedAccessException("You can only confirm your own orders");
+
+            if (order.OrderStatus != "PICKED_UP")
+                throw new InvalidOperationException("Order must be picked up before confirming receipt.");
+
+            order.OrderStatus = "CUSTOMER_RECEIVED";
+            await _orderRepo.UpdateAsync(order);
+
+            _logger.LogInformation("Order {OrderId} confirmed received by Customer {CustomerId}", orderId, customerId);
             return MapToResponse(order);
         }
 
@@ -205,7 +224,7 @@ namespace QuickBite.Order.Services
         {
             var orders = await _orderRepo.GetByAgentIdAsync(agentId);
             // Only return orders that are still active (i.e., not completed or cancelled)
-            var activeStatuses = new[] { "PLACED", "CONFIRMED", "PREPARING", "PICKED_UP" };
+            var activeStatuses = new[] { "PLACED", "CONFIRMED", "PREPARING", "PICKED_UP", "CUSTOMER_RECEIVED" };
             return orders
                 .Where(o => activeStatuses.Contains(o.OrderStatus))
                 .Select(MapToResponse)
