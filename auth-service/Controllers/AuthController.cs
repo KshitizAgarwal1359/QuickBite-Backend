@@ -12,11 +12,13 @@ namespace QuickBite.Auth.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly IUserRepository _userRepository;
         private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IAuthService authService, ILogger<AuthController> logger)
+        public AuthController(IAuthService authService, IUserRepository userRepository, ILogger<AuthController> logger)
         {
             _authService = authService;
+            _userRepository = userRepository;
             _logger = logger;
         }
 
@@ -137,6 +139,30 @@ namespace QuickBite.Auth.Controllers
             var userId = GetCurrentUserId();
             await _authService.DeactivateAccountAsync(userId);
             return Ok(new { message = "Account deactivated successfully" });
+        }
+
+        /// <summary>
+        /// Internal system endpoint: given a list of userIds, returns which ones have deactivated accounts.
+        /// Used by delivery-service to auto-correct stale IsAvailable flags.
+        /// Protected by shared internal secret header — NOT a JWT endpoint.
+        /// </summary>
+        [HttpPost("internal/inactive-user-ids")]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetInactiveUserIds(
+            [FromBody] List<int> userIds,
+            [FromHeader(Name = "X-Internal-Secret")] string? secret)
+        {
+            var expected = HttpContext.RequestServices
+                .GetRequiredService<IConfiguration>()["InternalSecrets:ServiceKey"];
+            if (string.IsNullOrEmpty(expected) || secret != expected)
+                return Unauthorized(new { message = "Invalid internal secret" });
+
+            if (userIds == null || userIds.Count == 0)
+                return Ok(new List<int>());
+
+            var inactiveIds = await _userRepository.GetInactiveUserIdsAsync(userIds);
+            return Ok(inactiveIds);
         }
 
         // ─── Helpers ──────────────────────────────────────────────────────────────

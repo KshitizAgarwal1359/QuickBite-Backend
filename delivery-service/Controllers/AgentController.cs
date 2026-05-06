@@ -128,6 +128,34 @@ namespace QuickBite.Delivery.Controllers
         }
 
         /// <summary>
+        /// Internal system call: force an agent offline when their user account is deactivated.
+        /// Called by auth-service — no JWT required, protected by shared secret header.
+        /// </summary>
+        [HttpPut("user/{userId}/forceOffline")]
+        [AllowAnonymous]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> ForceOffline(int userId, [FromHeader(Name = "X-Internal-Secret")] string? secret)
+        {
+            // Validate shared secret so this endpoint is not publicly abusable
+            var expected = HttpContext.RequestServices
+                .GetRequiredService<IConfiguration>()["InternalSecrets:ServiceKey"];
+            if (string.IsNullOrEmpty(expected) || secret != expected)
+                return Unauthorized(new { message = "Invalid internal secret" });
+
+            try
+            {
+                await _deliveryService.SetAvailabilityAsync(userId, false, forceOffline: true);
+                return Ok(new { message = $"Agent for user {userId} forced offline" });
+            }
+            catch (KeyNotFoundException)
+            {
+                // User is not an agent — that's fine, just ignore
+                return Ok(new { message = "User is not a registered agent, no action taken" });
+            }
+        }
+
+        /// <summary>
         /// Update aggregate rating based on customer feedback.
         /// </summary>
         [HttpPut("{id}/rating")]

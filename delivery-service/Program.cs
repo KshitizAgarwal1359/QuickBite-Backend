@@ -95,6 +95,7 @@ try
     builder.Services.AddSignalR();
 
     // ─── DI ──────────────────────────────────────────────────────────────
+    builder.Services.AddHttpClient();   // IHttpClientFactory for auth-service cross-checks
     builder.Services.AddScoped<IAgentRepository, AgentRepository>();
     builder.Services.AddScoped<IDeliveryService, DeliveryServiceImpl>();
 

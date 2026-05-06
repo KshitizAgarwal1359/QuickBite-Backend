@@ -73,5 +73,14 @@ namespace QuickBite.Auth.Repository
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<List<int>> GetInactiveUserIdsAsync(List<int> userIds)
+        {
+            // Returns userIds from the given list whose IsActive = false
+            return await _context.Users
+                .Where(u => userIds.Contains(u.UserId) && !u.IsActive)
+                .Select(u => u.UserId)
+                .ToListAsync();
+        }
     }
 }

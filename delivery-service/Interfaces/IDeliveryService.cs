@@ -10,7 +10,7 @@ namespace QuickBite.Delivery.Interfaces
         Task<List<AgentResponseDto>> GetAllAgentsAsync();
         Task<List<AgentDistanceResponseDto>> GetNearbyAgentsAsync(double latitude, double longitude, double radiusInKm = 5);
         Task<AgentResponseDto> UpdateLocationAsync(int userId, LocationUpdateRequestDto request);
-        Task<AgentResponseDto> SetAvailabilityAsync(int userId, bool isAvailable);
+        Task<AgentResponseDto> SetAvailabilityAsync(int userId, bool isAvailable, bool forceOffline = false);
         Task<AgentResponseDto> VerifyAgentAsync(int agentId);
         Task<AgentResponseDto> AssignOrderAsync(int agentId, int orderId);
         Task<AgentResponseDto> CompleteDeliveryAsync(int userId, int orderId);

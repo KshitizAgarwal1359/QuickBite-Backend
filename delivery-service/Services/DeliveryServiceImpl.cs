@@ -10,18 +10,21 @@ namespace QuickBite.Delivery.Services
     {
         private readonly IAgentRepository _agentRepo;
         private readonly IHubContext<LocationHub> _hubContext;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IConfiguration _config;
         private readonly ILogger<DeliveryServiceImpl> _logger;
 
-        // In a real system, you'd store active deliveries in Redis or a DB table (e.g. AgentDeliveries).
-        // Since the requirements didn't specify a new table for active deliveries in this DB, 
-        // we'll rely on the order-service calling complete/assign, or we can use a small in-memory dict for demo
-        // (but ideally it would be queried from order-service).
-        // For now, we'll just mock it or leave it empty, as the actual order state is in Order DB.
-        
-        public DeliveryServiceImpl(IAgentRepository agentRepo, IHubContext<LocationHub> hubContext, ILogger<DeliveryServiceImpl> logger)
+        public DeliveryServiceImpl(
+            IAgentRepository agentRepo,
+            IHubContext<LocationHub> hubContext,
+            IHttpClientFactory httpClientFactory,
+            IConfiguration config,
+            ILogger<DeliveryServiceImpl> logger)
         {
             _agentRepo = agentRepo;
             _hubContext = hubContext;
+            _httpClientFactory = httpClientFactory;
+            _config = config;
             _logger = logger;
         }
 
@@ -65,7 +68,65 @@ namespace QuickBite.Delivery.Services
         public async Task<List<AgentResponseDto>> GetAllAgentsAsync()
         {
             var agents = await _agentRepo.GetAllAsync();
-            return agents.Select(MapToResponse).ToList();
+
+            // Cross-check with auth-service: find any agents whose user account is now deactivated
+            // and auto-correct their IsAvailable flag in the DB.
+            // This fixes stale data (e.g. Chaman deactivated before the forceOffline webhook existed).
+            var onlineAgents = agents.Where(a => a.IsAvailable).ToList();
+            if (onlineAgents.Count > 0)
+            {
+                var inactiveIds = await GetInactiveUserIdsFromAuthAsync(
+                    onlineAgents.Select(a => a.UserId).ToList());
+
+                if (inactiveIds.Count > 0)
+                {
+                    foreach (var agent in onlineAgents.Where(a => inactiveIds.Contains(a.UserId)))
+                    {
+                        agent.IsAvailable = false;
+                        await _agentRepo.UpdateAsync(agent);
+                        _logger.LogWarning(
+                            "Auto-corrected: Agent {AgentId} (UserId {UserId}) forced offline — account is deactivated",
+                            agent.AgentId, agent.UserId);
+                    }
+                }
+            }
+
+            // Re-fetch after corrections so the response reflects the updated state
+            var updated = await _agentRepo.GetAllAsync();
+            return updated.Select(MapToResponse).ToList();
+        }
+
+        /// <summary>
+        /// Calls auth-service to get the list of userIds (from the given set) whose accounts are inactive.
+        /// Returns empty list if auth-service is unreachable — fail-open to avoid blocking admin page.
+        /// </summary>
+        private async Task<List<int>> GetInactiveUserIdsFromAuthAsync(List<int> userIds)
+        {
+            try
+            {
+                var authBaseUrl = _config["ServiceUrls:Auth"] ?? "http://localhost:5093";
+                var secret = _config["InternalSecrets:ServiceKey"];
+
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("X-Internal-Secret", secret);
+
+                var response = await client.PostAsJsonAsync(
+                    $"{authBaseUrl}/api/v1/auth/internal/inactive-user-ids", userIds);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("Auth batch-check returned {Status}", response.StatusCode);
+                    return [];
+                }
+
+                return await response.Content.ReadFromJsonAsync<List<int>>() ?? [];
+            }
+            catch (Exception ex)
+            {
+                // Fail-open: if auth-service is down, don’t block the admin page
+                _logger.LogError(ex, "Failed to reach auth-service for inactive user check");
+                return [];
+            }
         }
 
         public async Task<List<AgentDistanceResponseDto>> GetNearbyAgentsAsync(double latitude, double longitude, double radiusInKm = 5)
@@ -121,18 +182,21 @@ namespace QuickBite.Delivery.Services
             return MapToResponse(agent);
         }
 
-        public async Task<AgentResponseDto> SetAvailabilityAsync(int userId, bool isAvailable)
+        public async Task<AgentResponseDto> SetAvailabilityAsync(int userId, bool isAvailable, bool forceOffline = false)
         {
             var agent = await _agentRepo.GetByUserIdAsync(userId);
             if (agent == null) throw new KeyNotFoundException("Agent not found");
 
-            if (isAvailable && !agent.IsVerified)
+            // Only enforce verified check when agent is trying to go ONLINE.
+            // forceOffline=true bypasses this (used by account deactivation).
+            if (isAvailable && !agent.IsVerified && !forceOffline)
                 throw new InvalidOperationException("Unverified agents cannot go online.");
 
             agent.IsAvailable = isAvailable;
             await _agentRepo.UpdateAsync(agent);
             
-            _logger.LogInformation("Agent {AgentId} availability changed to {IsAvailable}", agent.AgentId, isAvailable);
+            _logger.LogInformation("Agent {AgentId} availability changed to {IsAvailable}{Forced}", 
+                agent.AgentId, isAvailable, forceOffline ? " (forced by system)" : "");
 
             return MapToResponse(agent);
         }

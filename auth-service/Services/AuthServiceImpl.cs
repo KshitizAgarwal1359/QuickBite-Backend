@@ -9,15 +9,21 @@ namespace QuickBite.Auth.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IJwtTokenProvider _jwtTokenProvider;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IConfiguration _config;
         private readonly ILogger<AuthServiceImpl> _logger;
 
         public AuthServiceImpl(
             IUserRepository userRepository,
             IJwtTokenProvider jwtTokenProvider,
+            IHttpClientFactory httpClientFactory,
+            IConfiguration config,
             ILogger<AuthServiceImpl> logger)
         {
             _userRepository = userRepository;
             _jwtTokenProvider = jwtTokenProvider;
+            _httpClientFactory = httpClientFactory;
+            _config = config;
             _logger = logger;
         }
 
@@ -193,6 +199,42 @@ namespace QuickBite.Auth.Services
             await _userRepository.UpdateAsync(user);
 
             _logger.LogWarning("Account deactivated: UserId {UserId}, Email {Email}", userId, user.Email);
+
+            // If the deactivated user is an AGENT, force their delivery profile offline
+            // so the admin panel stops showing them as available.
+            if (user.Role.Equals("AGENT", StringComparison.OrdinalIgnoreCase))
+            {
+                await ForceAgentOfflineAsync(userId);
+            }
+        }
+
+        /// <summary>
+        /// Makes an internal HTTP call to delivery-service to set the agent's IsAvailable = false.
+        /// Protected by a shared secret header. Fails silently so deactivation always succeeds.
+        /// </summary>
+        private async Task ForceAgentOfflineAsync(int userId)
+        {
+            try
+            {
+                var deliveryBaseUrl = _config["ServiceUrls:Delivery"] ?? "http://localhost:5272";
+                var secret = _config["InternalSecrets:ServiceKey"];
+
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("X-Internal-Secret", secret);
+
+                var response = await client.PutAsync(
+                    $"{deliveryBaseUrl}/api/v1/agents/user/{userId}/forceOffline", null);
+
+                if (response.IsSuccessStatusCode)
+                    _logger.LogInformation("Agent for UserId {UserId} forced offline after account deactivation", userId);
+                else
+                    _logger.LogWarning("Failed to force agent offline for UserId {UserId}. Status: {Status}", userId, response.StatusCode);
+            }
+            catch (Exception ex)
+            {
+                // Never block account deactivation due to delivery-service being unavailable
+                _logger.LogError(ex, "Exception while forcing agent offline for UserId {UserId}", userId);
+            }
         }
 
         /// <summary>

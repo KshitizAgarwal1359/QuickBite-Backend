@@ -13,5 +13,6 @@ namespace QuickBite.Auth.Interfaces
         Task<User> AddAsync(User user);
         Task UpdateAsync(User user);
         Task DeleteByUserIdAsync(int userId);
+        Task<List<int>> GetInactiveUserIdsAsync(List<int> userIds);
     }
 }

@@ -75,6 +75,7 @@ try
     });
 
     // ─── Dependency Injection ─────────────────────────────────────────────────
+    builder.Services.AddHttpClient();   // for inter-service calls (e.g. force agent offline on deactivation)
     builder.Services.AddScoped<IUserRepository, UserRepository>();
     builder.Services.AddScoped<IAuthService, AuthServiceImpl>();
     builder.Services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
