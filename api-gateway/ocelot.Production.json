@@ -1,0 +1,162 @@
+{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/api/v1/auth/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-auth-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/auth/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/auth",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-auth-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/auth",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/restaurants/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-restaurant-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/restaurants/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/restaurants",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-restaurant-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/restaurants",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/menu/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-menu-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/menu/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/menu",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-menu-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/menu",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/cart/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-cart-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/cart/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/cart",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-cart-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/cart",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/orders/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-order-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/orders/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/orders",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-order-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/orders",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/payments/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-payment-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/payments/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/payments",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-payment-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/payments",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/agents/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-delivery-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/deliveries/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/agents",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-delivery-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/deliveries",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/wallet/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-payment-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/wallet/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/wallet",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-payment-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/wallet",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/reviews/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-review-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/reviews/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/reviews",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-review-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/reviews",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/notifications/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-notification-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/notifications/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/v1/notifications",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-notification-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/api/v1/notifications",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/hub/notification/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-notification-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/hub/notification/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ]
+    },
+    {
+      "DownstreamPathTemplate": "/hub/notification",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [ { "Host": "quickbite-notification-service.onrender.com", "Port": 443 } ],
+      "UpstreamPathTemplate": "/hub/notification",
+      "UpstreamHttpMethod": [ "GET", "POST", "OPTIONS" ]
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "https://quickbite-api-gateway.onrender.com"
+  }
+}
+

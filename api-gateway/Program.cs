@@ -13,9 +13,13 @@ try
     var builder = WebApplication.CreateBuilder(args);
 
     // ─── Load Ocelot config file ───────────────────────────────────────────────
+    var ocelotFile = builder.Environment.IsProduction()
+        ? "ocelot.Production.json"
+        : "ocelot.json";
+
     builder.Configuration
         .SetBasePath(builder.Environment.ContentRootPath)
-        .AddJsonFile("ocelot.json", optional: false, reloadOnChange: true)
+        .AddJsonFile(ocelotFile, optional: false, reloadOnChange: true)
         .AddEnvironmentVariables();
 
     // ─── Serilog ──────────────────────────────────────────────────────────────
