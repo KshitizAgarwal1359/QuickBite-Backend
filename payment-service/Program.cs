@@ -26,14 +26,15 @@ try
                      .ReadFrom.Services(services)
                      .Enrich.FromLogContext());
 
-    // ─── Database ────────────────────────────────────────────────────────
+    // ─── Database (SQL Server locally, PostgreSQL on Render) ─────────────────
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
     builder.Services.AddDbContext<PaymentDbContext>(options =>
-        options.UseSqlServer(
-            builder.Configuration.GetConnectionString("DefaultConnection"),
-            sqlOptions => sqlOptions.EnableRetryOnFailure(
-                maxRetryCount: 3,
-                maxRetryDelay: TimeSpan.FromSeconds(5),
-                errorNumbersToAdd: null)));
+    {
+        if (connectionString.StartsWith("Host=") || connectionString.StartsWith("postgresql://") || connectionString.StartsWith("postgres://"))
+            options.UseNpgsql(connectionString);
+        else
+            options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null));
+    });
 
     // ─── JWT Authentication ──────────────────────────────────────────────
     var jwtSecretKey = builder.Configuration["Jwt:SecretKey"]

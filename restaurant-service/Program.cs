@@ -27,14 +27,15 @@ try
                      .ReadFrom.Services(services)
                      .Enrich.FromLogContext());
 
-    // ─── Database — EF Core + SQL Server ─────────────────────────────────────
+    // ─── Database (SQL Server locally, PostgreSQL on Render) ─────────────────
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
     builder.Services.AddDbContext<RestaurantDbContext>(options =>
-        options.UseSqlServer(
-            builder.Configuration.GetConnectionString("DefaultConnection"),
-            sqlOptions => sqlOptions.EnableRetryOnFailure(
-                maxRetryCount: 3,
-                maxRetryDelay: TimeSpan.FromSeconds(5),
-                errorNumbersToAdd: null)));
+    {
+        if (connectionString.StartsWith("Host=") || connectionString.StartsWith("postgresql://") || connectionString.StartsWith("postgres://"))
+            options.UseNpgsql(connectionString);
+        else
+            options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null));
+    });
 
     // ─── JWT Authentication (validates tokens issued by auth-service) ─────────
     var jwtSecretKey = builder.Configuration["Jwt:SecretKey"]
