@@ -136,9 +136,8 @@ try
 
     var app = builder.Build();
 
-    if (app.Environment.IsDevelopment())
+    using (var scope = app.Services.CreateScope())
     {
-        using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<NotificationDbContext>();
         db.Database.Migrate();
         Log.Information("Database migration applied successfully");

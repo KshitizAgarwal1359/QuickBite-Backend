@@ -135,9 +135,8 @@ try
     // ─────────────────────────────────────────────────────────────────────────
 
     // ─── Apply EF Core Migrations on startup (Development only) ──────────────
-    if (app.Environment.IsDevelopment())
+    using (var scope = app.Services.CreateScope())
     {
-        using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<RestaurantDbContext>();
         db.Database.Migrate();
         Log.Information("Database migration applied successfully");

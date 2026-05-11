@@ -147,9 +147,8 @@ try
     var app = builder.Build();
 
     // ─── Auto-migrate ────────────────────────────────────────────────────
-    if (app.Environment.IsDevelopment())
+    using (var scope = app.Services.CreateScope())
     {
-        using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<DeliveryDbContext>();
         db.Database.Migrate();
         Log.Information("Database migration applied successfully");

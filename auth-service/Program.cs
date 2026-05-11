@@ -135,10 +135,9 @@ try
     var app = builder.Build();
     // ─────────────────────────────────────────────────────────────────────────
 
-    // ─── Apply EF Core Migrations on startup (Development only) ──────────────
-    if (app.Environment.IsDevelopment())
+    // ─── Apply EF Core Migrations on startup (all environments) ──────────────
+    using (var scope = app.Services.CreateScope())
     {
-        using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
         db.Database.Migrate();
         Log.Information("Database migration applied successfully");
