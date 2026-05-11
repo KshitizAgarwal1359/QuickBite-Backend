@@ -1,0 +1,19 @@
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 8080
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY ["notification-service/QuickBite.Notification.csproj", "notification-service/"]
+RUN dotnet restore "notification-service/QuickBite.Notification.csproj"
+COPY . .
+WORKDIR "/src/notification-service"
+RUN dotnet build "QuickBite.Notification.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "QuickBite.Notification.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "QuickBite.Notification.dll"]
