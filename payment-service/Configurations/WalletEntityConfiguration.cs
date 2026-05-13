@@ -8,7 +8,7 @@ namespace QuickBite.Payment.Configurations
     {
         public void Configure(EntityTypeBuilder<Wallet> builder)
         {
-            builder.ToTable("Wallets", t => t.HasCheckConstraint("CK_Wallet_Balance_NonNegative", "[Balance] >= 0"));
+            builder.ToTable("Wallets", t => t.HasCheckConstraint("CK_Wallet_Balance_NonNegative", "\"Balance\" >= 0"));
             builder.HasKey(w => w.WalletId);
             builder.Property(w => w.WalletId).ValueGeneratedOnAdd();
 

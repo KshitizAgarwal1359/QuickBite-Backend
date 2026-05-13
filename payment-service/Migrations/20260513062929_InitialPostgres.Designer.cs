@@ -12,7 +12,7 @@ using QuickBite.Payment.Data;
 namespace QuickBite.Payment.Migrations
 {
     [DbContext(typeof(PaymentDbContext))]
-    [Migration("20260513052103_InitialPostgres")]
+    [Migration("20260513062929_InitialPostgres")]
     partial class InitialPostgres
     {
         /// <inheritdoc />
@@ -102,7 +102,7 @@ namespace QuickBite.Payment.Migrations
 
                     b.ToTable("Wallets", null, t =>
                         {
-                            t.HasCheckConstraint("CK_Wallet_Balance_NonNegative", "[Balance] >= 0");
+                            t.HasCheckConstraint("CK_Wallet_Balance_NonNegative", "\"Balance\" >= 0");
                         });
                 });
 

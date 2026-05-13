@@ -99,7 +99,7 @@ namespace QuickBite.Payment.Migrations
 
                     b.ToTable("Wallets", null, t =>
                         {
-                            t.HasCheckConstraint("CK_Wallet_Balance_NonNegative", "[Balance] >= 0");
+                            t.HasCheckConstraint("CK_Wallet_Balance_NonNegative", "\"Balance\" >= 0");
                         });
                 });
 

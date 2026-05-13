@@ -45,7 +45,7 @@ namespace QuickBite.Payment.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Wallets", x => x.WalletId);
-                    table.CheckConstraint("CK_Wallet_Balance_NonNegative", "[Balance] >= 0");
+                    table.CheckConstraint("CK_Wallet_Balance_NonNegative", "\"Balance\" >= 0");
                 });
 
             migrationBuilder.CreateTable(
