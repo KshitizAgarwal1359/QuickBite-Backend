@@ -32,7 +32,7 @@ try
     builder.Services.AddDbContext<MenuDbContext>(options =>
     {
         if (connectionString.StartsWith("Host=") || connectionString.StartsWith("postgresql://") || connectionString.StartsWith("postgres://"))
-            options.UseNpgsql(connectionString);
+            options.UseNpgsql(connectionString, sql => sql.MigrationsHistoryTable("__EFMigrationsHistory_Menu"));
         else
             options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null));
     });

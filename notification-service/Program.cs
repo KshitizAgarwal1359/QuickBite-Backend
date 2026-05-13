@@ -31,7 +31,7 @@ try
     builder.Services.AddDbContext<NotificationDbContext>(options =>
     {
         if (connectionString.StartsWith("Host=") || connectionString.StartsWith("postgresql://") || connectionString.StartsWith("postgres://"))
-            options.UseNpgsql(connectionString);
+            options.UseNpgsql(connectionString, sql => sql.MigrationsHistoryTable("__EFMigrationsHistory_Notification"));
         else
             options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null));
     });

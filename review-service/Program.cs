@@ -30,7 +30,7 @@ try
     builder.Services.AddDbContext<ReviewDbContext>(options =>
     {
         if (connectionString.StartsWith("Host=") || connectionString.StartsWith("postgresql://") || connectionString.StartsWith("postgres://"))
-            options.UseNpgsql(connectionString);
+            options.UseNpgsql(connectionString, sql => sql.MigrationsHistoryTable("__EFMigrationsHistory_Review"));
         else
             options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null));
     });
