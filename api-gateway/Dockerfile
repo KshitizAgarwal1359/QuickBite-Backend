@@ -4,10 +4,9 @@ EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["api-gateway/QuickBite.ApiGateway.csproj", "api-gateway/"]
-RUN dotnet restore "api-gateway/QuickBite.ApiGateway.csproj"
+COPY ["QuickBite.ApiGateway.csproj", "./"]
+RUN dotnet restore "QuickBite.ApiGateway.csproj"
 COPY . .
-WORKDIR "/src/api-gateway"
 RUN dotnet build "QuickBite.ApiGateway.csproj" -c Release -o /app/build
 
 FROM build AS publish

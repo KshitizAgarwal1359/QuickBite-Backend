@@ -4,10 +4,9 @@ EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["review-service/QuickBite.Review.csproj", "review-service/"]
-RUN dotnet restore "review-service/QuickBite.Review.csproj"
+COPY ["QuickBite.Review.csproj", "./"]
+RUN dotnet restore "QuickBite.Review.csproj"
 COPY . .
-WORKDIR "/src/review-service"
 RUN dotnet build "QuickBite.Review.csproj" -c Release -o /app/build
 
 FROM build AS publish

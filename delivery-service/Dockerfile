@@ -4,10 +4,9 @@ EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["delivery-service/delivery-service.csproj", "delivery-service/"]
-RUN dotnet restore "delivery-service/delivery-service.csproj"
+COPY ["delivery-service.csproj", "./"]
+RUN dotnet restore "delivery-service.csproj"
 COPY . .
-WORKDIR "/src/delivery-service"
 RUN dotnet build "delivery-service.csproj" -c Release -o /app/build
 
 FROM build AS publish

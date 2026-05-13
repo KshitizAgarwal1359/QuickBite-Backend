@@ -4,10 +4,9 @@ EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["cart-service/cart-service.csproj", "cart-service/"]
-RUN dotnet restore "cart-service/cart-service.csproj"
+COPY ["cart-service.csproj", "./"]
+RUN dotnet restore "cart-service.csproj"
 COPY . .
-WORKDIR "/src/cart-service"
 RUN dotnet build "cart-service.csproj" -c Release -o /app/build
 
 FROM build AS publish

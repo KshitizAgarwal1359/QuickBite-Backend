@@ -4,10 +4,9 @@ EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["notification-service/QuickBite.Notification.csproj", "notification-service/"]
-RUN dotnet restore "notification-service/QuickBite.Notification.csproj"
+COPY ["QuickBite.Notification.csproj", "./"]
+RUN dotnet restore "QuickBite.Notification.csproj"
 COPY . .
-WORKDIR "/src/notification-service"
 RUN dotnet build "QuickBite.Notification.csproj" -c Release -o /app/build
 
 FROM build AS publish

@@ -4,10 +4,9 @@ EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["menu-service/menu-service.csproj", "menu-service/"]
-RUN dotnet restore "menu-service/menu-service.csproj"
+COPY ["menu-service.csproj", "./"]
+RUN dotnet restore "menu-service.csproj"
 COPY . .
-WORKDIR "/src/menu-service"
 RUN dotnet build "menu-service.csproj" -c Release -o /app/build
 
 FROM build AS publish
