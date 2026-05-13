@@ -43,8 +43,7 @@ namespace QuickBite.Auth.Configurations
                 .HasDefaultValue(true);
 
             builder.Property(u => u.CreatedAt)
-                .IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
+                .IsRequired();
 
             builder.Property(u => u.ProfilePicUrl)
                 .HasMaxLength(500);
