@@ -81,8 +81,8 @@ namespace QuickBite.Cart.Migrations
                 columns: new[] { "PromoCodeId", "Code", "DiscountPercent", "ExpiryDate", "IsActive", "MaxDiscountAmount", "MinOrderValue", "UsageLimit" },
                 values: new object[,]
                 {
-                    { 1, "WELCOME50", 50.0, new DateTime(2027, 12, 31, 0, 0, 0, 0, DateTimeKind.Unspecified), true, 100.0, 200.0, 1000 },
-                    { 2, "FLAT20", 20.0, new DateTime(2027, 12, 31, 0, 0, 0, 0, DateTimeKind.Unspecified), true, 50.0, 0.0, 5000 }
+                    { 1, "WELCOME50", 50.0, new DateTime(2027, 12, 31, 0, 0, 0, 0, DateTimeKind.Utc), true, 100.0, 200.0, 1000 },
+                    { 2, "FLAT20", 20.0, new DateTime(2027, 12, 31, 0, 0, 0, 0, DateTimeKind.Utc), true, 50.0, 0.0, 5000 }
                 });
 
             migrationBuilder.CreateIndex(

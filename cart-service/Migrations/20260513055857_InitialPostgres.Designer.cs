@@ -12,7 +12,7 @@ using QuickBite.Cart.Data;
 namespace QuickBite.Cart.Migrations
 {
     [DbContext(typeof(CartDbContext))]
-    [Migration("20260513052018_InitialPostgres")]
+    [Migration("20260513055857_InitialPostgres")]
     partial class InitialPostgres
     {
         /// <inheritdoc />
@@ -157,7 +157,7 @@ namespace QuickBite.Cart.Migrations
                             PromoCodeId = 1,
                             Code = "WELCOME50",
                             DiscountPercent = 50.0,
-                            ExpiryDate = new DateTime(2027, 12, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            ExpiryDate = new DateTime(2027, 12, 31, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
                             MaxDiscountAmount = 100.0,
                             MinOrderValue = 200.0,
@@ -169,7 +169,7 @@ namespace QuickBite.Cart.Migrations
                             PromoCodeId = 2,
                             Code = "FLAT20",
                             DiscountPercent = 20.0,
-                            ExpiryDate = new DateTime(2027, 12, 31, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            ExpiryDate = new DateTime(2027, 12, 31, 0, 0, 0, 0, DateTimeKind.Utc),
                             IsActive = true,
                             MaxDiscountAmount = 50.0,
                             MinOrderValue = 0.0,

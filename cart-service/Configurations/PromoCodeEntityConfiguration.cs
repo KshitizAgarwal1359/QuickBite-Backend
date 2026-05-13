@@ -33,7 +33,7 @@ namespace QuickBite.Cart.Configurations
                     DiscountPercent = 50,
                     MaxDiscountAmount = 100,
                     MinOrderValue = 200,
-                    ExpiryDate = new DateTime(2027, 12, 31),
+                    ExpiryDate = new DateTime(2027, 12, 31, 0, 0, 0, DateTimeKind.Utc),
                     UsageLimit = 1000,
                     TimesUsed = 0,
                     IsActive = true
@@ -45,7 +45,7 @@ namespace QuickBite.Cart.Configurations
                     DiscountPercent = 20,
                     MaxDiscountAmount = 50,
                     MinOrderValue = 0,
-                    ExpiryDate = new DateTime(2027, 12, 31),
+                    ExpiryDate = new DateTime(2027, 12, 31, 0, 0, 0, DateTimeKind.Utc),
                     UsageLimit = 5000,
                     TimesUsed = 0,
                     IsActive = true
