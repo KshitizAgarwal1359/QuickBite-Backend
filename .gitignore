@@ -1,0 +1,7 @@
+# Ignore Language Server Cache files
+*.lscache
+
+# Typical .NET ignores
+[Bb]in/
+[Oo]bj/
+.vs/
